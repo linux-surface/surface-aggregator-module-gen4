@@ -1,14 +1,14 @@
-From 41247558fd269843f6147cab04923a3208e739b6 Mon Sep 17 00:00:00 2001
+From ea8bc52f72423a7d7663d72f2b24ac13d3230708 Mon Sep 17 00:00:00 2001
 From: qzed <qzed@users.noreply.github.com>
 Date: Fri, 5 Apr 2019 18:17:59 +0200
 Subject: [PATCH] Add quirk for Surface SAM I2C address space
 
 ---
- drivers/i2c/i2c-core-acpi.c | 194 +++++++++++++++++++++++++++++++++---
- 1 file changed, 181 insertions(+), 13 deletions(-)
+ drivers/i2c/i2c-core-acpi.c | 199 +++++++++++++++++++++++++++++++++---
+ 1 file changed, 186 insertions(+), 13 deletions(-)
 
 diff --git a/drivers/i2c/i2c-core-acpi.c b/drivers/i2c/i2c-core-acpi.c
-index 272800692088..c0e8d7e97842 100644
+index 272800692088..ac3c736371f0 100644
 --- a/drivers/i2c/i2c-core-acpi.c
 +++ b/drivers/i2c/i2c-core-acpi.c
 @@ -45,6 +45,21 @@ struct i2c_acpi_lookup {
@@ -107,7 +107,7 @@ index 272800692088..c0e8d7e97842 100644
  
  	status = acpi_bus_get_private_data(handle, (void **)&data);
  	if (ACPI_SUCCESS(status))
-@@ -714,3 +747,138 @@ void i2c_acpi_remove_space_handler(struct i2c_adapter *adapter)
+@@ -714,3 +747,143 @@ void i2c_acpi_remove_space_handler(struct i2c_adapter *adapter)
  	acpi_bus_detach_private_data(handle);
  }
  #endif /* CONFIG_ACPI_I2C_OPREGION */
@@ -208,6 +208,11 @@ index 272800692088..c0e8d7e97842 100644
 +
 +static const struct i2c_acpi_adapter_quirks *quirks_check_surface_sam(acpi_handle handle)
 +{
++	static const struct acpi_device_id sam_device_ids[] = {
++		{"MSHW0030", 0},
++		{"", 0},
++	};
++
 +	struct acpi_device *sam_dev;
 +	acpi_handle sam;
 +	acpi_status status;
@@ -231,7 +236,7 @@ index 272800692088..c0e8d7e97842 100644
 +		return NULL;
 +	}
 +
-+	if (!strcmp(acpi_device_hid(sam_dev), "MSHW0030")) {
++	if (acpi_match_device_ids(sam_dev, sam_device_ids)) {
 +		printk("surface_sam: not a SAM device\n");
 +		return NULL;
 +	}
