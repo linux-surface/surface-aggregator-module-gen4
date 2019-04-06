@@ -1,14 +1,14 @@
-From 8ce60406c057e5dfce5fc5161a66f356a206de7d Mon Sep 17 00:00:00 2001
+From 4553c9bcb849b9947d2859a4de2929abeffbacaf Mon Sep 17 00:00:00 2001
 From: qzed <qzed@users.noreply.github.com>
 Date: Fri, 5 Apr 2019 18:17:59 +0200
 Subject: [PATCH] Add quirk for Surface SAM I2C address space
 
 ---
- drivers/i2c/i2c-core-acpi.c | 190 +++++++++++++++++++++++++++++++++---
- 1 file changed, 177 insertions(+), 13 deletions(-)
+ drivers/i2c/i2c-core-acpi.c | 179 +++++++++++++++++++++++++++++++++---
+ 1 file changed, 166 insertions(+), 13 deletions(-)
 
 diff --git a/drivers/i2c/i2c-core-acpi.c b/drivers/i2c/i2c-core-acpi.c
-index 272800692088..554a4cb02556 100644
+index 272800692088..1aac9501334f 100644
 --- a/drivers/i2c/i2c-core-acpi.c
 +++ b/drivers/i2c/i2c-core-acpi.c
 @@ -45,6 +45,21 @@ struct i2c_acpi_lookup {
@@ -107,7 +107,7 @@ index 272800692088..554a4cb02556 100644
  
  	status = acpi_bus_get_private_data(handle, (void **)&data);
  	if (ACPI_SUCCESS(status))
-@@ -714,3 +747,134 @@ void i2c_acpi_remove_space_handler(struct i2c_adapter *adapter)
+@@ -714,3 +747,123 @@ void i2c_acpi_remove_space_handler(struct i2c_adapter *adapter)
  	acpi_bus_detach_private_data(handle);
  }
  #endif /* CONFIG_ACPI_I2C_OPREGION */
@@ -155,8 +155,6 @@ index 272800692088..554a4cb02556 100644
 +	u8 action = function & ACPI_IO_MASK;
 +	acpi_status ret;
 +
-+	printk("surface_sam: handler called\n");
-+
 +	ret = acpi_buffer_to_resource(info->connection, info->length, &ares);
 +	if (ACPI_FAILURE(ret))
 +		return ret;
@@ -184,7 +182,6 @@ index 272800692088..554a4cb02556 100644
 +		client->flags |= I2C_CLIENT_TEN;
 +
 +	gsb->status = surface_sam_i2c_write(client, gsb->data, info->access_length);
-+	printk("surface_sam: writing to i2c, status: %d\n", gsb->status);
 +
 + err:
 +	kfree(client);
@@ -208,31 +205,23 @@ index 272800692088..554a4cb02556 100644
 +	acpi_handle sam;
 +	acpi_status status;
 +
-+	printk("surface_sam: checking quirks\n");
-+
 +	status = acpi_get_handle(NULL, "\\_SB.PCI0.I2C0.SAM", &sam);
 +	if (ACPI_FAILURE(status)) {
-+		printk("surface_sam: failed to get handle to SAM\n");
 +		return NULL;
 +	}
 +
 +	status = acpi_bus_get_device(sam, &sam_dev);
 +	if (ACPI_FAILURE(status)) {
-+		printk("surface_sam: failed to get acpi_device\n");
 +		return NULL;
 +	}
 +
 +	if (sam_dev->parent->handle != handle) {
-+		printk("surface_sam: SAM is not a child of this adapter\n");
 +		return NULL;
 +	}
 +
 +	if (acpi_match_device_ids(sam_dev, sam_device_ids)) {
-+		printk("surface_sam: not a SAM device\n");
 +		return NULL;
 +	}
-+
-+	printk("surface_sam: applying quirks\n");
 +
 +	return &surface_sam_quirks;
 +}
