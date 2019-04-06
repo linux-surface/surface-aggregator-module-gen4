@@ -1,14 +1,14 @@
-From ea8bc52f72423a7d7663d72f2b24ac13d3230708 Mon Sep 17 00:00:00 2001
+From 8ce60406c057e5dfce5fc5161a66f356a206de7d Mon Sep 17 00:00:00 2001
 From: qzed <qzed@users.noreply.github.com>
 Date: Fri, 5 Apr 2019 18:17:59 +0200
 Subject: [PATCH] Add quirk for Surface SAM I2C address space
 
 ---
- drivers/i2c/i2c-core-acpi.c | 199 +++++++++++++++++++++++++++++++++---
- 1 file changed, 186 insertions(+), 13 deletions(-)
+ drivers/i2c/i2c-core-acpi.c | 190 +++++++++++++++++++++++++++++++++---
+ 1 file changed, 177 insertions(+), 13 deletions(-)
 
 diff --git a/drivers/i2c/i2c-core-acpi.c b/drivers/i2c/i2c-core-acpi.c
-index 272800692088..ac3c736371f0 100644
+index 272800692088..554a4cb02556 100644
 --- a/drivers/i2c/i2c-core-acpi.c
 +++ b/drivers/i2c/i2c-core-acpi.c
 @@ -45,6 +45,21 @@ struct i2c_acpi_lookup {
@@ -107,7 +107,7 @@ index 272800692088..ac3c736371f0 100644
  
  	status = acpi_bus_get_private_data(handle, (void **)&data);
  	if (ACPI_SUCCESS(status))
-@@ -714,3 +747,143 @@ void i2c_acpi_remove_space_handler(struct i2c_adapter *adapter)
+@@ -714,3 +747,134 @@ void i2c_acpi_remove_space_handler(struct i2c_adapter *adapter)
  	acpi_bus_detach_private_data(handle);
  }
  #endif /* CONFIG_ACPI_I2C_OPREGION */
@@ -121,23 +121,14 @@ index 272800692088..ac3c736371f0 100644
 +{
 +
 +	struct i2c_msg msgs[1];
-+	u8 *buffer;
 +	int ret = AE_OK;
-+
-+	buffer = kzalloc(data_len, GFP_KERNEL);
-+	if (!buffer)
-+		return AE_NO_MEMORY;
-+
-+	memcpy(buffer, data, data_len);
 +
 +	msgs[0].addr = client->addr;
 +	msgs[0].flags = client->flags;
 +	msgs[0].len = data_len;
-+	msgs[0].buf = buffer;
++	msgs[0].buf = data;
 +
 +	ret = i2c_transfer(client->adapter, msgs, ARRAY_SIZE(msgs));
-+
-+	kfree(buffer);
 +
 +	if (ret < 0) {
 +		dev_err(&client->adapter->dev, "i2c write failed: %d\n", ret);
