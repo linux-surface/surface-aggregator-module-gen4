@@ -29,7 +29,15 @@ static void sam_report(struct hid_device *hdev, struct hid_report *report)
 
 static int sam_probe(struct hid_device *hdev, const struct hid_device_id *id)
 {
+	int status;
 	hid_info(hdev, "sam_probe: device: %s, bus: %d\n", hdev->name, hdev->bus);
+
+	status = hid_hw_start(hdev, HID_CONNECT_DEFAULT);
+	if (status) {
+		return status;
+	}
+
+	hid_info(hdev, "sam_probe: success\n");
 	return 0;
 }
 
