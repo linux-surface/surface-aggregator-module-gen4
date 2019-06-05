@@ -66,6 +66,18 @@ class HidDevice():
         buf = (ctypes.c_char * len(report)).from_buffer(bytearray(report))
         self._ioctl(HIDIOCSFEATURE(len(report)), buf, True)
 
+    def getFeatureReport(self, num, length=64):
+        data = bytearray(length)
+        data[0] = num
+
+        buf = (ctypes.c_char * length).from_buffer(data)
+        self._ioctl(HIDIOCGFEATURE(length), buf, True)
+
+        return data
+
+    def writeOutputReport(self, report):
+        os.write(self.fd, report)
+
     def scmd(self, code):
         data = [
             0x24,    # first byte must be report id
@@ -75,10 +87,20 @@ class HidDevice():
 
         self.setFeatureReport(bytes(data))
 
+    def o_scmd(self, code):
+        data = [
+            0x24,    # first byte must be report id
+            code, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        ]
+
+        self.writeOutputReport(bytes(data))
+
 
 def main():
     with HidDevice.open(sys.argv[1]) as dev:
         dev.scmd(int(sys.argv[2], 0))
+        # add custom commands here...
 
 
 if __name__ == '__main__':
