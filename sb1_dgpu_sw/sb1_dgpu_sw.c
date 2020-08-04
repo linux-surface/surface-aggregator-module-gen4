@@ -6,14 +6,47 @@
 #include <linux/platform_device.h>
 
 
+static ssize_t dgpu_dsmcall_store(struct device *dev, struct device_attribute *attr,
+				  const char *buf, size_t len)
+{
+	return 0;
+}
+
+static ssize_t dgpu_power_store(struct device *dev, struct device_attribute *attr,
+				const char *buf, size_t len)
+{
+	return 0;
+}
+
+static ssize_t dgpu_power_show(struct device *dev, struct device_attribute *attr,
+			       char *buf)
+{
+	return 0;
+}
+
+static DEVICE_ATTR_WO(dgpu_dsmcall);
+static DEVICE_ATTR_RW(dgpu_power);
+
+static struct attribute *sb1_dgpu_sw_attrs[] = {
+	&dev_attr_dgpu_dsmcall.attr,
+	&dev_attr_dgpu_power.attr,
+	NULL,
+};
+
+static const struct attribute_group sb1_dgpu_sw_attr_group = {
+	.attrs = sb1_dgpu_sw_attrs,
+};
+
+
 static int sb1_dgpu_sw_probe(struct platform_device *pdev)
 {
-	return 0;	// TODO
+	return sysfs_create_group(&pdev->dev.kobj, &sb1_dgpu_sw_attr_group);
 }
 
 static int sb1_dgpu_sw_remove(struct platform_device *pdev)
 {
-	return 0;	// TODO
+	sysfs_remove_group(&pdev->dev.kobj, &sb1_dgpu_sw_attr_group);
+	return 0;
 }
 
 /*
