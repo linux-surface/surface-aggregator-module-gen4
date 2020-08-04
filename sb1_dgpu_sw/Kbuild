@@ -1,0 +1,7 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+
+obj-m += sb1_dgpu_sw.o
+
+ccflags-y += -Wall -Wextra
+ccflags-y += -Wno-unused-parameter -Wno-missing-field-initializers
+ccflags-y += -Wmaybe-uninitialized -Wuninitialized
