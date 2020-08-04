@@ -18,14 +18,8 @@ static ssize_t dgpu_power_store(struct device *dev, struct device_attribute *att
 	return 0;
 }
 
-static ssize_t dgpu_power_show(struct device *dev, struct device_attribute *attr,
-			       char *buf)
-{
-	return 0;
-}
-
 static DEVICE_ATTR_WO(dgpu_dsmcall);
-static DEVICE_ATTR_RW(dgpu_power);
+static DEVICE_ATTR_WO(dgpu_power);
 
 static struct attribute *sb1_dgpu_sw_attrs[] = {
 	&dev_attr_dgpu_dsmcall.attr,
