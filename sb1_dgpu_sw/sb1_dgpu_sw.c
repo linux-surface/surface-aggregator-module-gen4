@@ -12,13 +12,30 @@
 #define pr_fmt(fmt) "%s:%s: " fmt, KBUILD_MODNAME, __func__
 
 
+static const guid_t dgpu_sw_guid = GUID_INIT(0x6fd05c69, 0xcde3, 0x49f4,
+	0x95, 0xed, 0xab, 0x16, 0x65, 0x49, 0x80, 0x35);
+
+#define DGPUSW_ACPI_PATH_DSM	"\\_SB_.PCI0.LPCB.EC0_.VGBI"
 #define DGPUSW_ACPI_PATH_HGON	"\\_SB_.PCI0.RP05.HGON"
 #define DGPUSW_ACPI_PATH_HGOF	"\\_SB_.PCI0.RP05.HGOF"
 
 
 static int sb1_dgpu_sw_dsmcall(void)
 {
-	return 0;	// TODO
+	union acpi_object *ret;
+	acpi_handle handle;
+	acpi_status status;
+
+	status = acpi_get_handle(NULL, DGPUSW_ACPI_PATH_DSM, &handle);
+	if (status)
+		return -EINVAL;
+
+	ret = acpi_evaluate_dsm_typed(handle, &dgpu_sw_guid, 1, 1, NULL, ACPI_TYPE_BUFFER);
+	if (!ret)
+		return -EINVAL;
+
+	ACPI_FREE(ret);
+	return 0;
 }
 
 static int sb1_dgpu_sw_hgon(void)
