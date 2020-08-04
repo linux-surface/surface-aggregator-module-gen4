@@ -6,16 +6,55 @@
 #include <linux/platform_device.h>
 
 
+static int sb1_dgpu_sw_hgon(void)
+{
+	return 0;	// TODO
+}
+
+static int sb1_dgpu_sw_hgof(void)
+{
+	return 0;	// TODO
+}
+
+static int sb1_dgpu_sw_dsmcall(void)
+{
+	return 0;	// TODO
+}
+
+
 static ssize_t dgpu_dsmcall_store(struct device *dev, struct device_attribute *attr,
 				  const char *buf, size_t len)
 {
-	return 0;
+	int status, value;
+
+	status = kstrtoint(buf, 0, &value);
+	if (status < 0)
+		return status;
+
+	if (value != 1)
+		return -EINVAL;
+
+	status = sb1_dgpu_sw_dsmcall();
+
+	return status < 0 ? status : len;
 }
 
 static ssize_t dgpu_power_store(struct device *dev, struct device_attribute *attr,
 				const char *buf, size_t len)
 {
-	return 0;
+	bool power;
+	int status;
+
+	status = kstrtobool(buf, &power);
+	if (status < 0)
+		return status;
+
+	if (power)
+		status = sb1_dgpu_sw_hgon();
+	else
+		status = sb1_dgpu_sw_hgof();
+
+	return status < 0 ? status : len;
 }
 
 static DEVICE_ATTR_WO(dgpu_dsmcall);
