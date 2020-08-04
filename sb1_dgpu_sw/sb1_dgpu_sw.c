@@ -6,19 +6,55 @@
 #include <linux/platform_device.h>
 
 
-static int sb1_dgpu_sw_hgon(void)
-{
-	return 0;	// TODO
-}
+#ifdef pr_fmt
+#undef pr_fmt
+#endif
+#define pr_fmt(fmt) "%s:%s: " fmt, KBUILD_MODNAME, __func__
 
-static int sb1_dgpu_sw_hgof(void)
-{
-	return 0;	// TODO
-}
+
+#define DGPUSW_ACPI_PATH_HGON	"\\_SB_.PCI0.RP05.HGON"
+#define DGPUSW_ACPI_PATH_HGOF	"\\_SB_.PCI0.RP05.HGOF"
+
 
 static int sb1_dgpu_sw_dsmcall(void)
 {
 	return 0;	// TODO
+}
+
+static int sb1_dgpu_sw_hgon(void)
+{
+	struct acpi_buffer buf = {ACPI_ALLOCATE_BUFFER, NULL};
+	acpi_status status;
+
+	status = acpi_evaluate_object(NULL, DGPUSW_ACPI_PATH_HGON, NULL, &buf);
+	if (status) {
+		pr_err("failed to run HGON: %d\n", status);
+		return -EINVAL;
+	}
+
+	if (buf.pointer)
+		ACPI_FREE(buf.pointer);
+
+	pr_info("turned-on dGPU via HGON\n");
+	return 0;
+}
+
+static int sb1_dgpu_sw_hgof(void)
+{
+	struct acpi_buffer buf = {ACPI_ALLOCATE_BUFFER, NULL};
+	acpi_status status;
+
+	status = acpi_evaluate_object(NULL, DGPUSW_ACPI_PATH_HGOF, NULL, &buf);
+	if (status) {
+		pr_err("failed to run HGOF: %d\n", status);
+		return -EINVAL;
+	}
+
+	if (buf.pointer)
+		ACPI_FREE(buf.pointer);
+
+	pr_info("turned-off dGPU via HGOF\n");
+	return 0;
 }
 
 
