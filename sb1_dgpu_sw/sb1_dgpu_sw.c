@@ -150,7 +150,7 @@ static struct platform_driver sb1_dgpu_sw = {
 	.probe = sb1_dgpu_sw_probe,
 	.remove = sb1_dgpu_sw_remove,
 	.driver = {
-		.name = "surface_sam_sid",
+		.name = "sb1_dgpu_sw",
 		.acpi_match_table = sb1_dgpu_sw_match,
 		.probe_type = PROBE_PREFER_ASYNCHRONOUS,
 	},
